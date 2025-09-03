@@ -16,6 +16,9 @@ public class SliderController : MonoBehaviour
     private float[] pinP = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
     private int iterations = 0;
 
+    [SerializeField] Material baseMaterial;
+    [SerializeField] Material outMaterial;
+
     float mainFunc()
     {
         float result = 0f;
@@ -107,6 +110,7 @@ public class SliderController : MonoBehaviour
                     pinG[pinNum] = positionToGValue(newPosition);
                     moveLogic(pinNum, (float)deltaG);
                     setSlidersPosition();
+                    checkAndDye();
                 }
             }
         }
@@ -133,7 +137,7 @@ public class SliderController : MonoBehaviour
             k[i] = delta > 0 ? -1 / k[i] : k[i];
         }
 
-        while (MathF.Abs(mainFunc() - 1) > 0.01 || iterations < 10000)
+        while (MathF.Abs(mainFunc() - 1) > 0.01)
         {
             adjustG(k);
             iterations++;
@@ -148,6 +152,16 @@ public class SliderController : MonoBehaviour
         for(int i = 0; i < 5; i++)
             if (pinG[i] < 1 && pinG[i] > 0)
             pinG[i] += 0.00005f * k[i];
+    }
+
+    void checkAndDye()
+    {
+        for (int i = 0;i < 5; i++)
+        {
+            if (pinG[i] < pinP[i])
+                GameObject.Find(pinNumtoName(i)).GetComponent<Renderer>().material = outMaterial;
+            else GameObject.Find(pinNumtoName(i)).GetComponent<Renderer>().material = baseMaterial;
+        }
     }
 
     void roundG()
