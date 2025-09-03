@@ -40,7 +40,7 @@ public class SliderController : MonoBehaviour
         setPinSizes();
         if (getFirstPoint()) //todo - add loading
             setSlidersPosition();
-        //else - should add "No Paretto-Efficient points were found"
+        else print("No Paretto-efficient points were found");
     }
 
     void setPinSizes() //height = PSI/2
@@ -52,7 +52,7 @@ public class SliderController : MonoBehaviour
         }
     }
 
-    bool getFirstPoint() //todo
+    bool getFirstPoint()
     {
         pinP.CopyTo(pinG, 0);
         if (mainFunc() > 1) return false;
@@ -71,7 +71,6 @@ public class SliderController : MonoBehaviour
 
     void Update()
     {
-        print($"Используется памяти: {GC.GetTotalMemory(false)} байт");
         Vector3 oldestPosition = Vector3.zero;
         // Начало перетаскивания
         if (Input.GetMouseButtonDown(0) && selectedPin == null)
@@ -110,7 +109,8 @@ public class SliderController : MonoBehaviour
                     pinG[pinNum] = positionToGValue(newPosition);
                     moveLogic(pinNum, (float)deltaG);
                     setSlidersPosition();
-                    checkAndDye();
+                    print("!!!");
+                    //checkAndDye();
                 }
             }
         }
@@ -140,11 +140,9 @@ public class SliderController : MonoBehaviour
         while (MathF.Abs(mainFunc() - 1) > 0.01)
         {
             adjustG(k);
-            iterations++;
-            print(iterations);
         }
         roundG();
-        iterations = 0;
+        print("!!");
     }
 
     void adjustG(float[] k)
