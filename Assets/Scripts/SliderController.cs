@@ -8,16 +8,17 @@ public class SliderController : MonoBehaviour
     private Transform selectedPin = null;
     private Camera mainCamera;
 
-    private float[] pinG = { 0.5f, 0.5f, 0.5f, 0.5f, 0.5f }; //G values of 
-    private float[] pinA = { 2f, 1f, 3f, 1f, 1f };
-    private float[] pinB = { 2f, 2f, 2f, 2f, 2f };
-    private float[] pinPSI = { 0.3f, 0.1f, 0.1f, 0.4f, 0.1f };
+    private float[] pinG = { 0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
 
-    private float[] pinP = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
-    private int iterations = 0;
+    public float[] pinA { get; private set; } = { 2f, 1f, 3f, 1f, 1f };
+    public float[] pinB { get; private set; } = { 2f, 2f, 2f, 2f, 2f };
+    public float[] pinPSI { get; private set; } = { 0.3f, 0.1f, 0.1f, 0.4f, 0.1f };
+    public float[] pinP { get; private set; } = { 0.2f, 0.2f, 0.2f, 0.2f, 0.2f };
 
     [SerializeField] Material baseMaterial;
     [SerializeField] Material outMaterial;
+
+    [SerializeField] ConstantSetter constantSetter;
 
     float mainFunc()
     {
@@ -31,16 +32,31 @@ public class SliderController : MonoBehaviour
 
     void Start()
     {
+        constantSetter = GameObject.Find("Panel").GetComponent<ConstantSetter>();
         mainCamera = GetComponent<Camera>();
-        simulationStart();
+        togglePins();
+        //simulationStart();
     }
 
-    void simulationStart()
+    void togglePins()
     {
+        for (int i = 0; i < 5; i++)
+            GameObject.Find(pinNumtoName(i)).SetActive(!GameObject.Find(pinNumtoName(i)).active);
+    }
+
+    public void simulationStart()
+    {
+        togglePins();
         setPinSizes();
-        if (getFirstPoint()) //todo - add loading
+
+        if (getFirstPoint())
             setSlidersPosition();
         else print("No Paretto-efficient points were found");
+    }
+
+    public void simulationEnd()
+    {
+        togglePins();
     }
 
     void setPinSizes() //height = PSI/2
@@ -110,7 +126,7 @@ public class SliderController : MonoBehaviour
                     moveLogic(pinNum, (float)deltaG);
                     setSlidersPosition();
                     print("!!!");
-                    //checkAndDye();
+                    checkAndDye();
                 }
             }
         }
@@ -137,7 +153,8 @@ public class SliderController : MonoBehaviour
             k[i] = delta > 0 ? -1 / k[i] : k[i];
         }
 
-        while (MathF.Abs(mainFunc() - 1) > 0.01)
+        //while (MathF.Abs(mainFunc() - 1) > 0.01 || mainFunc() <= 1)
+        while (mainFunc() < 0.98 || mainFunc() > 1.02)
         {
             adjustG(k);
         }
@@ -149,7 +166,7 @@ public class SliderController : MonoBehaviour
     {
         for(int i = 0; i < 5; i++)
             if (pinG[i] < 1 && pinG[i] > 0)
-            pinG[i] += 0.00005f * k[i];
+            pinG[i] += 0.00001f * k[i];
     }
 
     void checkAndDye()
